@@ -1,0 +1,4 @@
+other4_a 灰度手动增加
+other4_b 摄像头曝光时间
+other4_c 摄像头灰度限制
+other4_d 摄像头增益大小
