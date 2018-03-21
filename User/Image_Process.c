@@ -17,7 +17,8 @@ uint8  zhongxian[CAMERA_H][CAMERA_W];                  //定义储存中线的数组
 uint8  bianyan[CAMERA_H];                              //定义储存边沿信息数据
 uint8  bianyan_flag = 0;                                //定义边沿flag
 uint8  midline1_L,midline2_L,midline3_L;
-
+/*中间变量*/
+uint8 HuandaosanlianR_1 = 0, HuandaosanlianR_2 = 0, HuandaosanlianL_1 = 0, HuandaosanlianL_2 = 0;
 /*
  *  @brief      路况标识初始化函数
  *  @param
@@ -134,6 +135,7 @@ void Get_MiddleLine(uint8 midline1_H, uint8 midline2_H, uint8 midline3_H)
           /*提取前瞻行*/
 		  if (i == midline1_H)
 		  {
+
 			  midline1_L = n;
 		  }
 		  if (i == midline2_H)
@@ -163,16 +165,18 @@ void Get_Road_flag(void)
 {
 	uint8 Sharp_left_number = 0, Sharp_right_number = 0;
 	uint8 cross_number = 0;
+        uint8 i;
+        
 	/************************************************************************/
 	/*         ********判断急弯情况*******                                 */
 	/************************************************************************/
 	if (bianyan_flag == 1)                 //如果边沿信息和为1，说明右边丢了边沿
 	{
 		Sharp_right_number++;
-		if (Sharp_right_number >= 20)
+		if (Sharp_right_number >= 15)
 		{
 			R_Sharp_turn_flag = 1;        //如果连续20行右边丢边沿，则判断此时为右急弯
-			Buzzer_NO();
+			//Buzzer_NO();
 		}
 	}
 	else Sharp_right_number = 0;
@@ -180,10 +184,10 @@ void Get_Road_flag(void)
 	if (bianyan_flag == 10)                 //如果边沿信息和为10，说明左边丢了边沿
 	{
 		Sharp_left_number++;
-		if (Sharp_left_number >= 20)
+		if (Sharp_left_number >= 15)
 		{
 			L_Sharp_turn_flag = 1;        //如果连续20行左边丢边沿，则判断此时为左急弯
-			Buzzer_NO();
+			//Buzzer_NO();
 		}
 	}
 	else Sharp_left_number = 0;
@@ -199,8 +203,9 @@ void Get_Road_flag(void)
 		cross_number++;
 		if (cross_number >= 10)
 		{
+			cross_number = 0;                 //把记录丢边沿信息的标志位清零
 			cross_flag = 1;                  //如果连续10行两边丢边沿，则判断此时为十字
-			Buzzer_NO();
+			//Buzzer_NO();
 		}
 	}
 	else cross_number = 0;
@@ -227,10 +232,54 @@ void Get_Road_flag(void)
 	当存在标志位a时则从当前行继续向后搜索，
 	当搜索到左边沿不丢失时，记录一个标志位b
 	当存在标志位b时，从当前行继续向后搜索。
-	当ab标志位都存在时，从当前行继续向后搜索，若左边沿又连续三行地出现，则判断当前已经处于左环岛。
+	当ab标志位都存在时，从当前行继续向后搜索，若左边沿又连续三行地出现，则判断当前已经处于左环岛
 
-	/************************************************************************/
-
+	/*************************/
+	if ((HuandaosanlianR_1 == 0)||(HuandaosanlianL_1== 0))                          //若环岛三段第一段标志为0，即检测，若已有标志，便无需复检
+	{
+		for (i = 0; i < CAMERA_H; i++)
+		{
+			if (bianyan[i] == 1)
+			{
+				HuandaosanlianR_1 = i;
+				break;
+			}
+			if (bianyan[i] == 10)
+			{
+				HuandaosanlianL_1 = i;
+				break;
+			}
+		}
+	}
+	if ((HuandaosanlianR_2 == 0)||(HuandaosanlianL_2==0))
+	{
+		for (i = MAX(HuandaosanlianR_1,HuandaosanlianL_1); i < CAMERA_H; i++)
+		{
+			if (bianyan[i] == 11)
+			{
+				HuandaosanlianR_2 = i;
+				HuandaosanlianL_2 = i;
+				break;
+			}
+		}
+	}
+	for (i = MAX(HuandaosanlianR_2,HuandaosanlianL_2); i < CAMERA_H; i++)
+	{
+		if ((bianyan[i] == 1)&&(HuandaosanlianR_1!=0)&&(HuandaosanlianR_2 > HuandaosanlianR_1))
+		{
+			R_Loop_flag = 1;
+			Buzzer_NO();
+			break;
+		}
+		if ((bianyan[i] == 10) && (HuandaosanlianL_1 != 0) && (HuandaosanlianL_2 > HuandaosanlianL_1))
+		{
+			L_Loop_flag = 1;
+			Buzzer_NO();
+			break;
+		}
+	}
+	
+	/***************环岛判断结束***************/
 }
 
 

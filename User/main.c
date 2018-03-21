@@ -55,27 +55,30 @@ extern int16  Speed_val;    //编码器采集脉冲数
 
        float average;
        int SD5_Duty;
-       uint8 RS540_Duty = 170;
+       uint16 RS540_Duty = 185;
 
     while(1)
     {
-      SD5_flag=SD5_Normal;
- //      RS540_Turn(RS540_Duty);
+       SD5_flag=SD5_Normal;
+       RS540_Turn(RS540_Duty);
 	   Get_img();                      //获取图像
 	   Speed_Get();        //速度采集，50ms采集一次  改：磨轮胎，30秒反转一次
        
-	   Get_MiddleLine(28, 29, 30);
-	   Get_Road_flag();
+	   Get_MiddleLine(28, 31, 33);
+	 //  Get_Road_flag();
+	   SD5_Turn(SD5_Duty);
 	
 		/************************************************************************/
 		/* 以上为提取中线代码     以下为偏差计算                                */
 		/************************************************************************/
 		average = (midline1_L*0.4 + midline2_L*0.3 + midline3_L*0.3) - CAMERA_W / 2;
-		if (average > 10)
+		if (abs(average) > 10)
 			average = average*3.5;
-		else
+		else if (abs(average) < 1)
+			average = average*0;
+                else
 			average = average*2.3;
-          SD5_Contral(average);
+		  SD5_Contral(average);
                   
 	  LCD_Img_gray_Z(site, size,(uint8*) img, imgsize);
 	/****************************************************************************/

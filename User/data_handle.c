@@ -1,7 +1,17 @@
 #include "common.h"
 #include "include.h"
+#include "Image_Process.h"
 
-uint8 imgzhongxian[CAMERA_H][CAMERA_W]={1}; 
+
+
+
+	
+
+
+
+
+
+
 /*
 void zhongxian(uint8 *img,uint8 *zhongxian)
 {

@@ -32,9 +32,87 @@ void SD5_PID_Init()
 	SD5_pid.err = 0;
 	SD5_pid.err_next = 0;
 	SD5_pid.err_last = 0;
-	SD5_pid.Kp = 0.1;
-	SD5_pid.Ki = 0.3;
-	SD5_pid.Kd = 0.08;
+	SD5_pid.Kp = 0.5;
+	SD5_pid.Ki = 0.35;
+	SD5_pid.Kd = 0.01;
+}
+
+/*
+*  @brief      SD5_PID获取函数
+*  @param      内部更改kp,ki,kd,清除路况标志
+*/
+void  Get_SD5_PID(void)
+{
+	if (cross_flag)              //十字
+	{
+		SD5_pid.Kp = 0.5;
+		SD5_pid.Ki = 0.35;
+		SD5_pid.Kd = 0.01;
+
+		cross_flag = 0;
+	} 
+	else if (L_Sharp_turn_flag)    //左急弯
+	{
+		SD5_pid.Kp = 0.5;
+		SD5_pid.Ki = 0.35;
+		SD5_pid.Kd = 0.01;
+
+		L_Sharp_turn_flag = 0;
+	} 
+	else if (R_Sharp_turn_flag)    //右急弯
+	{
+		SD5_pid.Kp = 0.5;
+		SD5_pid.Ki = 0.35;
+		SD5_pid.Kd = 0.01;
+
+		R_Sharp_turn_flag = 0;
+	}
+	else if (Big_Turn_flag)      //大弯
+	{
+		SD5_pid.Kp = 0.5;
+		SD5_pid.Ki = 0.35;
+		SD5_pid.Kd = 0.01;
+
+		Big_Turn_flag = 0;
+	}
+	else if (S_flag)             //连续S小弯
+	{
+		SD5_pid.Kp = 0.5;
+		SD5_pid.Ki = 0.35;
+		SD5_pid.Kd = 0.01;
+
+		S_flag = 0;
+	}
+	else if (Barrier_flag)       //障碍
+	{
+		SD5_pid.Kp = 0.5;
+		SD5_pid.Ki = 0.35;
+		SD5_pid.Kd = 0.01;
+
+		Barrier_flag = 0;
+	}
+	else if (L_Loop_flag)          //左侧环岛
+	{
+		SD5_pid.Kp = 0.5;
+		SD5_pid.Ki = 0.35;
+		SD5_pid.Kd = 0.01;
+
+		L_Loop_flag = 0;
+	}
+	else if (R_Loop_flag)          //左侧环岛
+	{
+		SD5_pid.Kp = 0.5;
+		SD5_pid.Ki = 0.35;
+		SD5_pid.Kd = 0.01;
+
+		R_Loop_flag = 0;
+	}
+	else                         //正常
+	{
+		SD5_pid.Kp = 0.5;
+		SD5_pid.Ki = 0.35;
+		SD5_pid.Kd = 0.01;
+	}
 }
 
 /*
@@ -53,7 +131,7 @@ float SD5_PID(int16 actual_err)
 
 	if (abs(SD5_pid.increment) <= 10)
 	{
-		PID = 4 * SD5_pid.increment;
+		PID = 6 * SD5_pid.increment;
 	} 
 	else if (abs(SD5_pid.increment > 10 && abs(SD5_pid.increment) <= 30))
 	{
@@ -79,16 +157,16 @@ void  SD5_Contral(int16 average)
 	if (SD5_flag == SD5_Normal)  //如果偏差在正常范围
 	{
 		SD5_Duty = (int16)SD5_PID(average) + SD5_Duty_Middle;
-
-		if (SD5_Duty >= SD5_Left_max && SD5_Duty <= SD5_Right_max)    //如果占空比在可调范围内
+		                                                              //用于限制占空比的最大最小值
+		if (SD5_Duty >= SD5_Left_max && SD5_Duty <= SD5_Right_max)    
 		{
 			SD5_Turn(SD5_Duty);
 		}
-		else if (SD5_Duty <= SD5_Left_max)                            //如果占空比小于最左
+		else if (SD5_Duty <= SD5_Left_max)                            
 		{
 			SD5_Turn(SD5_Left_max);
 		}
-		else                                                          //如果占空比大于最右
+		else                                                         
 		{
 			SD5_Turn(SD5_Right_max);
 		}
@@ -103,8 +181,4 @@ void  SD5_Contral(int16 average)
 		SD5_Turn(SD5_Right_max);
 
 	}
-	
-
-
-
 }
